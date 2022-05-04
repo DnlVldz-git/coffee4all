@@ -13,7 +13,6 @@ Pasos para ejecutar este proyecto:
 * C4A_SECRET=
 * PORT=
 * ORIGIN= (dirección url de la aplicación de front end)
-* ENCRYPTION_SECRET=" (Tiene que ser la misma que se coloque en el front-end)
 
 ## Configuracion db
 * DB_HOST=
