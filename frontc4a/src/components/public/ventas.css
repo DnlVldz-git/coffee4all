@@ -1,0 +1,12 @@
+#root{
+    height: 100%;
+}
+
+.tables{
+    display: grid;
+    grid-template-columns: 69% 29%;
+}
+
+.paper{
+    margin-left: 10px;
+}

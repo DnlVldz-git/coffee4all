@@ -1,0 +1,18 @@
+#insumoDiv{
+    width: 20%;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 10px;
+    text-align: center;
+}
+
+#insumoDiv:hover{
+    cursor: pointer;
+    transition: ease 0.7s all;
+    background-color: rgb(214, 40, 40);
+}
+
+#insumoDiv:not(:hover){
+    transition: ease 0.7s all;
+}
+
