@@ -1,3 +1,18 @@
+
+Pasos para ejecutar este proyecto:
+
+1. ejecuta el comando `npm install`
+2. ejecuta el comando `npm start`
+
+# Variables de entorno
+
+### Crea un archivo .env en la carpeta /frontc4a
+### Introduce las siguientes variables
+
+## Configuracion general
+* REACT_APP_API = (url a la api del proyecto)
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
