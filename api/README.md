@@ -6,8 +6,8 @@ Pasos para ejecutar este proyecto:
 
 # Variables de entorno
 
-# Crea un archivo .env en la carpeta /api
-# Introduce las siguientes variables
+### Crea un archivo .env en la carpeta /api
+### Introduce las siguientes variables
 
 ## Configuracion general
 * C4A_SECRET=
