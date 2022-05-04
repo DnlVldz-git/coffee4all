@@ -6,9 +6,9 @@ require("dotenv").config();
 //crear una aplicación Express
 const app = express();
 
-//configuramos origin: http:// localhost: 9596
+// configuramos origin: http:// localhost: 9596
 var corsOptions = {
-    origin : "https://coffee4all-cd9c9.web.app"
+    origin : process.env.ORIGIN
 }
 
 app.use(cors(corsOptions));

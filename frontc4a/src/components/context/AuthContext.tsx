@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { createContext, ReactElement, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import { IUser, User } from "../models/User";
 
 export interface IAuthContext {

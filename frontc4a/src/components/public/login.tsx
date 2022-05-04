@@ -16,6 +16,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   let navigate = useNavigate();
   var CryptoJS = require("crypto-js");
+  const secret = process.env.ENCRYPTION_SECRET;
 
   const onChangeEmail = (event: {
     target: { value: SetStateAction<string> };

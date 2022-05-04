@@ -5,10 +5,11 @@ const jwtService = require("../services/jwt.service");
 const jwtServiceInstance = new jwtService();
 var CryptoJS = require("crypto-js");
 var sha256 = require('js-sha256');
-
+const encryptSecret = "cfa";
 
 // Crear y guardar un nuevo usuario
 exports.create = (req, res) => {
+
     // Validar request
     if (!req.body.nombre && !req.body.apellido_pat && !req.body.apellido_mat && !req.body.email && !req.body.telefono && !req.body.pwd) {
         res.status(400).send({
@@ -20,11 +21,11 @@ exports.create = (req, res) => {
     }
 
     Usuario.findAll({ where: { email: req.body.email } }).then(response1 => {
-        if (response1[0]) {            
+        if (response1[0]) {
             res.send("usuario existente");
         } else {
             // Crear un usuario
-            var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, "cfa");
+            var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, encryptSecret);
             var plaintext = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
             const usuario = {
@@ -93,7 +94,7 @@ exports.login = (req, res) => {
                 nombre: data[0].nombre
             }
 
-            var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, "cfa");
+            var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, encryptSecret);
             var plaintext = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
             if ((req.body.email === data[0].email) && (sha256(plaintext).toUpperCase() === data[0].pwd)) {
@@ -154,7 +155,7 @@ exports.isAdmin = (req, res) => {
 exports.update = (req, res) => {
     const id = req.params.id;
 
-    var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, "cfa");
+    var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, encryptSecret);
     var plaintext = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
     req.body.pwd = sha256(plaintext).toUpperCase();

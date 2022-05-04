@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const secret = process.env.C4A_SECRET;
 
