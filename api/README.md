@@ -11,7 +11,7 @@ Pasos para ejecutar este proyecto:
 
 ## Configuracion general
 * C4A_SECRET=
-* #PORT=
+* PORT=
 
 ## Configuracion db
 * DB_HOST=
