@@ -531,7 +531,7 @@ function UpdateDialog({
       telefono: user.telefono,
       foto: user.foto,
       rol: user.rol,
-      pwd: undefined,
+      pwd: "",
     },
   });
 
@@ -540,25 +540,32 @@ function UpdateDialog({
 
   const onSubmit = async (data: any) => {
     try {
-      if (data.pwd && data.pwd.trim()) {
+      let data2 = data;
+      if (data.pwd != "" && data.pwd.trim() != "") {
         var encryptedAES = CryptoJS.AES.encrypt(data.pwd, "cfa");
-        data = {
+        data2 = {
           ...data,
           pwd: encryptedAES.toString(),
         };
       } else {
-        data = {
-          ...data
+        data2 = {
+          nombre: data.nombre,
+          apellido_mat: data.apellido_mat,
+          apellido_pat: data.apellido_pat,
+          foto: data.foto,
+          telefono: data.telefono,
+          email: data.email,
+          id: data.id,          
         };
-        data.rol= rol;        
       }
+      data2.rol= rol;        
       if (file) {
         const promise1 = await ImagenesService.delete(user.foto).then(() => {
           const promise2 = ImagenesService.upload(file).then((response) => {
             if (data.pwd && data.pwd.trim()) {
-              data.foto = response.result.data;
-              data.id = user.id;
-              const promise = UserService.update(data);
+              data2.foto = response.result.data;
+              data2.id = user.id;
+              const promise = UserService.update(data2);
               toast.promise(promise, {
                 pending: "Espere por favor..",
                 success: "Usuario actualizado",
@@ -580,9 +587,9 @@ function UpdateDialog({
           });
         });
       } else {
-        data.foto = file;
-        data.id = user.id;
-        const promise = UserService.update(data);
+        data2.foto = file;
+        data2.id = user.id;
+        const promise = UserService.update(data2);
         toast.promise(promise, {
           pending: "Espere por favor..",
           success: "Usuario actualizado",

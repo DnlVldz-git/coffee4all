@@ -155,7 +155,7 @@ exports.isAdmin = (req, res) => {
 exports.update = (req, res) => {
     const id = req.params.id;
 
-    if (req.body.pwd != "") {
+    if (req.body.pwd) {
         var decryptedBytes = CryptoJS.AES.decrypt(req.body.pwd, encryptSecret);
         var plaintext = decryptedBytes.toString(CryptoJS.enc.Utf8);
         req.body.pwd = sha256(plaintext).toUpperCase();
