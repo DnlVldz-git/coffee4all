@@ -112,7 +112,7 @@ const Reportes = () => {
     const [total, setTotal] = useState(0);
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(0);
-    const [date, setDate] = useState<Date | null>(new Date());
+    const [date, setDate] = useState<Date | null>(null);
 
     const { control, handleSubmit, reset } = useForm({
       defaultValues: {
@@ -151,7 +151,7 @@ const Reportes = () => {
         } else {
           loadUsuarios();
         }
-      } else {
+      } else {        
         await VentaService.list(limit, page * limit).then((response) => {
           setVentas(response.ventas);
           setTotal(response.total);
@@ -258,7 +258,7 @@ const Reportes = () => {
               </Select>
             </div>
             <div>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
                 {console.log(date)}
                 <DatePicker
                   label="Fecha de venta"
@@ -268,7 +268,7 @@ const Reportes = () => {
                   }}
                   renderInput={(props) => <TextField {...props} />}
                 />
-              </LocalizationProvider>
+              </LocalizationProvider> */}
             </div>
             {/* <div>
               <FormGroup>

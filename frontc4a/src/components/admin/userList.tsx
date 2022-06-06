@@ -37,6 +37,8 @@ import {
   Select,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import DropZone from "./DropZone";
+import ImagenesService from "../services/Imagenes.Service";
 
 const UserList = () => {
   const [users, setUsers] = useState<Array<User>>([]);
@@ -47,18 +49,22 @@ const UserList = () => {
   const [remove, setRemove] = useState(false);
   const [update, setUpdate] = useState(false);
   const [person, setPerson] = useState(false);
-  
+  const [imagenes, setImagenes] = useState<Array<string>>([]);
 
   useEffect(() => {
-    loadUsers();    
+    loadUsers();
     localStorage.setItem("lastPage", "users");
   }, [person, total, page, limit]);
 
   const loadUsers = async () => {
     try {
-      const results = await UserService.list(limit, page* limit);
+      const results = await UserService.list(limit, page * limit);
       setUsers(results.users);
       setTotal(results.total);
+      for (let i = 0; i < results.users.length; i++) {
+        const imagen = await ImagenesService.get(results.users[i].foto);
+        imagenes.push(imagen.result);
+      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -113,60 +119,87 @@ const UserList = () => {
               <TableRow>
                 <TableCell>Nombre</TableCell>
                 <TableCell>Email</TableCell>
+                <TableCell>Foto</TableCell>
                 <TableCell>Rol</TableCell>
                 <TableCell>Editar</TableCell>
                 <TableCell>Eliminar</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user, index) => (
-                <TableRow
-                  key={`${user.id}${index}user`}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {user.nombre}
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    {user.email}
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    {user.rol}
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    <Button
-                      color="secondary"
-                      size="small"
-                      onClick={() => {
-                        setUser(user);
-                        setUpdate(true);
-                      }}
-                      style={{
-                        marginLeft: 2,
-                      }}
-                      variant="outlined"
-                    >
-                      Editar
-                    </Button>
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    <Button
-                      color="error"
-                      size="small"
-                      onClick={() => {
-                        setUser(user);
-                        setRemove(true);
-                      }}
-                      style={{
-                        marginLeft: 2,
-                      }}
-                      variant="outlined"
-                    >
-                      Eliminar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {users.map((user, index) => {
+                let imagen = "";
+                for (let i = 0; i < imagenes.length; i++) {
+                  let primerParte = imagenes[i].split("/");
+                  let segundaParte = primerParte[3].split("?");
+                  let key = segundaParte[0];
+                  if (key == user.foto) {
+                    imagen = imagenes[i];                    
+                  }
+                }
+
+                return (
+                  <TableRow
+                    key={`${user.id}${index}user`}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {user.nombre}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {user.email}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                    {user.foto ? (
+                        <div style={{ textAlign: "center" }}>
+                          <img
+                            src={imagen}
+                            style={{
+                              height: "70px",
+                              width: "30%",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {user.rol}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      <Button
+                        color="secondary"
+                        size="small"
+                        onClick={() => {
+                          setUser(user);
+                          setUpdate(true);
+                        }}
+                        style={{
+                          marginLeft: 2,
+                        }}
+                        variant="outlined"
+                      >
+                        Editar
+                      </Button>
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      <Button
+                        color="error"
+                        size="small"
+                        onClick={() => {
+                          setUser(user);
+                          setRemove(true);
+                        }}
+                        style={{
+                          marginLeft: 2,
+                        }}
+                        variant="outlined"
+                      >
+                        Eliminar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -225,6 +258,7 @@ export function PersonDialog({
 }) {
   const [loading, setLoading] = useState(false);
   const [rol, setRol] = useState("");
+  const [file, setFile] = useState<File | undefined>();
 
   var CryptoJS = require("crypto-js");
 
@@ -243,27 +277,39 @@ export function PersonDialog({
 
   const onSubmit = async (form: any) => {
     try {
-      setLoading(true);
-      form.rol = rol;
-      var encryptedAES = CryptoJS.AES.encrypt(form.pwd, "cfa");
-      form.pwd = encryptedAES.toString();
-      const promise = UserService.register(form).then((response) => {
-        if (response === "usuario existente") {
-          toast.error("Usuario con ese email ya existe", {
-            position: "top-right",
+      if (file) {
+        setLoading(true);
+        const promise1 = ImagenesService.upload(file).then((response) => {
+          form.rol = rol;
+          form.foto = response.result.data;
+          toast.promise(promise1, {
+            success: "Imagen almanacenada con éxito",
+            pending: "Espere por favor, almacenando imagen",
+            error: "Error",
           });
-        } else {
-          reset();
-          onClose();
-          toast.success("Usuario registrado con éxito", {
-            position: "top-right",
+          var encryptedAES = CryptoJS.AES.encrypt(form.pwd, "cfa");
+          form.pwd = encryptedAES.toString();
+          const promise = UserService.register(form).then((response) => {
+            if (response === "usuario existente") {
+              toast.error("Usuario con ese email ya existe", {
+                position: "top-right",
+              });
+            } else {
+              reset();
+              onClose();
+              toast.success("Usuario registrado con éxito", {
+                position: "top-right",
+              });
+            }
           });
-        }
-      });
-      toast.promise(promise, {
-        pending: "Espere por favor..",
-        error: "Error",
-      });
+          toast.promise(promise, {
+            pending: "Espere por favor..",
+            error: "Error",
+          });
+        });
+      } else {
+        toast.error("Seleccione una imagen");
+      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -375,18 +421,27 @@ export function PersonDialog({
             </div>
             <div style={{ marginBottom: 15 }}>
               <Typography variant="subtitle2">Foto</Typography>
-              <Controller
-                name="foto"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    type="text"
-                    variant="outlined"
-                    {...field}
-                    fullWidth
-                    placeholder=""
-                  />
-                )}
+              {file ? (
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    <img
+                      src={URL.createObjectURL(file)}
+                      style={{
+                        height: "100px",
+                        width: "100px",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                  <Typography variant="body1" component="span">
+                    {file.name}
+                  </Typography>
+                </>
+              ) : null}
+              <DropZone
+                saveFile={async (file) => {
+                  setFile(file);
+                }}
               />
             </div>
             <div style={{ marginBottom: 15 }}>
@@ -458,6 +513,14 @@ function UpdateDialog({
   onCreate: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | undefined>();
+  const [imagen, setImagen] = useState<string>("");
+
+  useEffect(() => {
+    ImagenesService.get(user.foto).then((response) =>
+      setImagen(response.result)
+    );
+  }, []);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -485,29 +548,59 @@ function UpdateDialog({
         };
       } else {
         data = {
-          ...data,
-          pwd: user.pwd,
+          ...data
         };
+        data.rol= rol;        
       }
-      data.id = user.id;
-      const promise = UserService.update(data);
-      toast.promise(promise, {
-        pending: "Espere por favor..",
-        success: "Usuario actualizado",
-        error: "Error",
-      });
-      reset({
-        nombre: "",
-        apellido_pat: "",
-        apellido_mat: "",
-        telefono: "",
-        foto: "",
-        email: "",
-        pwd: undefined,
-        rol: "",
-      });
-      close();
-      onCreate();
+      if (file) {
+        const promise1 = await ImagenesService.delete(user.foto).then(() => {
+          const promise2 = ImagenesService.upload(file).then((response) => {
+            if (data.pwd && data.pwd.trim()) {
+              data.foto = response.result.data;
+              data.id = user.id;
+              const promise = UserService.update(data);
+              toast.promise(promise, {
+                pending: "Espere por favor..",
+                success: "Usuario actualizado",
+                error: "Error",
+              });
+              reset({
+                nombre: "",
+                apellido_pat: "",
+                apellido_mat: "",
+                telefono: "",
+                foto: "",
+                email: "",
+                pwd: undefined,
+                rol: "",
+              });
+              close();
+              onCreate();
+            }
+          });
+        });
+      } else {
+        data.foto = file;
+        data.id = user.id;
+        const promise = UserService.update(data);
+        toast.promise(promise, {
+          pending: "Espere por favor..",
+          success: "Usuario actualizado",
+          error: "Error",
+        });
+        reset({
+          nombre: "",
+          apellido_pat: "",
+          apellido_mat: "",
+          telefono: "",
+          foto: "",
+          email: "",
+          pwd: undefined,
+          rol: "",
+        });
+        close();
+        onCreate();
+      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -607,18 +700,39 @@ function UpdateDialog({
         </div>
         <div style={{ marginBottom: 15 }}>
           <Typography variant="subtitle2">Foto</Typography>
-          <Controller
-            name="foto"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                type="text"
-                variant="outlined"
-                {...field}
-                fullWidth
-                placeholder=""
+          {file ? (
+            <>
+              <div style={{ textAlign: "center" }}>
+                <img
+                  src={URL.createObjectURL(file)}
+                  style={{
+                    height: 300,
+                    width: 300,
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+              <Typography variant="body1" component="span">
+                {file.name}
+              </Typography>
+            </>
+          ) : null}
+          {user.foto ? (
+            <div style={{ textAlign: "center" }}>
+              <img
+                src={imagen}
+                style={{
+                  height: 300,
+                  width: 300,
+                  objectFit: "contain",
+                }}
               />
-            )}
+            </div>
+          ) : null}
+          <DropZone
+            saveFile={async (file) => {
+              setFile(file);
+            }}
           />
         </div>
         <div style={{ marginBottom: 15 }}>

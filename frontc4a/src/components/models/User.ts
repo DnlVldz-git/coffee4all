@@ -4,7 +4,7 @@ export interface IUser {
   nombre: string;
   apellido_pat?: string;
   apellido_mat?: string;
-  foto?: string;
+  foto: string;
   telefono?: string;
   email?: string;
   rol?: string;
@@ -16,7 +16,7 @@ export class User implements IUser {
     nombre: string;
     apellido_pat?: string;
     apellido_mat?: string;
-    foto?: string;
+    foto: string;
     telefono?: string;
     email?: string;
     rol?: string;
@@ -28,7 +28,7 @@ export class User implements IUser {
     this.apellido_pat = data.apellido_pat || "";
     this.apellido_mat = data.apellido_mat || "";
     this.pwd = data.pwd || "";
-    this.foto = data.foto || "";
+    this.foto = data.foto;
     this.telefono = data.telefono || "";    
     this.rol = data.rol || "";
     this.email = data.email || "";
