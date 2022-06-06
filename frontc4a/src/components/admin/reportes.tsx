@@ -151,7 +151,7 @@ const Reportes = () => {
         } else {
           loadUsuarios();
         }
-      } else {        
+      } else {
         await VentaService.list(limit, page * limit).then((response) => {
           setVentas(response.ventas);
           setTotal(response.total);

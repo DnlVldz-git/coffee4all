@@ -512,8 +512,8 @@ export function ProductoDialog({
                     <img
                       src={URL.createObjectURL(file)}
                       style={{
-                        height: 300,
-                        width: 300,
+                        height: "100px",
+                        width: "100px",
                         objectFit: "contain",
                       }}
                     />
